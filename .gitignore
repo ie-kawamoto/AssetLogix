@@ -1,0 +1,19 @@
+# node
+node_modules/
+.env
+
+# logs
+*.log
+
+# mac
+.DS_Store
+
+# build
+dist/
+build/
+
+# vite
+.vite/
+
+# vscode
+.vscode/
