@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  password     String
+  role         Role         @default(USER)
+  departmentId Int?
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  rentals      Rental[]
+  reservations Reservation[]
+  notifications Notification[]
+  activityLogs ActivityLog[]
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Department {
+  id    Int    @id @default(autoincrement())
+  name  String
+
+  users User[]
+
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String
+
+  assets Asset[]
+}
+
+model Asset {
+  id          Int        @id @default(autoincrement())
+  name        String
+  categoryId  Int
+  category    Category   @relation(fields: [categoryId], references: [id])
+
+  status      AssetStatus @default(AVAILABLE)
+  location    String?
+  description String?
+
+  rentals     Rental[]
+  reservations Reservation[]
+  maintenanceLogs MaintenanceLog[]
+  logs        AssetLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Rental {
+  id         Int      @id @default(autoincrement())
+  assetId    Int
+  userId     Int
+
+  asset      Asset    @relation(fields: [assetId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  rentedAt   DateTime @default(now())
+  dueDate    DateTime
+  returnedAt DateTime?
+
+  status     RentalStatus @default(RENTED)
+
+  createdAt  DateTime @default(now())
+}
+
+model Reservation {
+  id        Int      @id @default(autoincrement())
+  assetId   Int
+  userId    Int
+
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime
+
+  status    ReservationStatus @default(ACTIVE)
+}
+
+model MaintenanceLog {
+  id          Int      @id @default(autoincrement())
+  assetId     Int
+
+  asset       Asset    @relation(fields: [assetId], references: [id])
+
+  type        MaintenanceType
+  description String?
+  performedAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  type      NotificationType
+  message   String
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  action     String
+  targetType String
+  targetId   Int?
+
+  createdAt  DateTime @default(now())
+}
+
+model AssetLog {
+  id        Int      @id @default(autoincrement())
+  assetId   Int
+
+  asset     Asset    @relation(fields: [assetId], references: [id])
+
+  status    AssetStatus
+  changedAt DateTime @default(now())
+}
+
+
+
+enum Role {
+  ADMIN
+  USER
+  GEST
+}
+
+enum AssetStatus {
+  AVAILABLE
+  RENTED
+  BROKEN
+}
+
+enum RentalStatus {
+  RENTED
+  RETURNED
+  OVERDUE
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum MaintenanceType {
+  REPAIR
+  INSPECTION
+}
+
+enum NotificationType {
+  DUE_SOON
+  OVERDUE
+}

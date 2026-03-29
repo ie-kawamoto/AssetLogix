@@ -1,0 +1,148 @@
+@import 'variables';
+
+.login-container {
+  min-height: 100vh;
+  @include flex-center;
+  background: linear-gradient(135deg, $primary-dark 0%, $primary-teal 100%);
+  padding: $spacing-lg;
+  font-family: $font-sans;
+}
+
+.login-wrapper {
+  width: 600px;
+  max-width: 80%;
+  background: $white;
+  border-radius: $radius-md;
+  border: 2px solid $primary-dark;
+  box-shadow: $shadow-xl;
+  @include animation-slide-up;
+}
+
+.login-header {
+  text-align: center;
+  .logo-container {
+    margin-top: 2rem;
+    @include flex-center;
+
+    img,
+    svg {
+      width: 350px;
+      height: auto;
+    }
+  }
+}
+
+.login-form {
+  padding: $spacing-3xl;
+}
+
+.form-group {
+  @include form-group;
+
+  label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-dark;
+    margin-bottom: $spacing-sm;
+    letter-spacing: 0.5px;
+  }
+
+  input {
+    @include input-base;
+    background-color: var(--bs-gray);
+
+    &:focus {
+      outline: none;
+      border-color: $primary-teal;
+      box-shadow: 0 0 0 3px rgba(29, 184, 160, 0.1);
+    }
+
+    &::placeholder {
+      color: #999;
+    }
+  }
+}
+
+.error {
+  background: linear-gradient(135deg, $error-bg 0%, $error-bg-light 100%);
+  color: $error-text;
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-xl;
+  border-left: 4px solid $error-border;
+  animation: shake 0.3s ease-out;
+}
+
+.submit-button {
+  @include button-base;
+  max-width: 200px;
+  background: linear-gradient(135deg, $primary-teal 0%, $primary-teal-dark 100%);
+  color: $white;
+  box-shadow: $shadow-md;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+    background: linear-gradient(135deg, $primary-teal-light 0%, $primary-teal 100%);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ===== Animations =====
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+// ===== Responsive Design =====
+@media (max-width: $breakpoint-sm) {
+  .login-form {
+    padding: $spacing-2xl $spacing-lg;
+  }
+
+  .login-header h2 {
+    font-size: $font-size-xl;
+  }
+
+  .form-group input {
+    padding: 10px 14px;
+    font-size: $font-size-base;
+  }
+}
