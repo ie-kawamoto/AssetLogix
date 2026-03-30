@@ -4,6 +4,9 @@ $primary-dark: #003d7a;
 $primary-teal: #1db8a0;
 $primary-teal-light: #21cdb5;
 $primary-teal-dark: #0fa584;
+$primary-led: #fc8484;
+$primary-blue: #4f46e5;
+$primary-blue-light: #63a1f1;
 
 // Neutral Colors
 $white: #ffffff;
@@ -37,11 +40,11 @@ $radius-lg: 2rem;
 $font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 $font-mono: ui-monospace, Consolas, monospace;
 
-$font-size-sm: 14px;
-$font-size-base: 16px;
-$font-size-lg: 18px;
-$font-size-xl: 24px;
-$font-size-2xl: 28px;
+$font-size-sm: 0.8rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.75rem;
+$font-size-2xl: 2.25rem;
 
 $font-weight-regular: 400;
 $font-weight-semibold: 600;

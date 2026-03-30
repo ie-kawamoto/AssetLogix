@@ -1,0 +1,104 @@
+@import 'variables';
+
+.sidebar {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  background: $white;
+  box-shadow: $shadow-md;
+  z-index: 900;
+  height: calc(100vh - 80px);
+
+  // 横スクロールバーを隠す（ラベルはoverflow-x:visibleのまま）
+  &::-webkit-scrollbar:horizontal {
+    height: 0;
+    display: none;
+  }
+
+  .sidebar-nav {
+    padding: $spacing-xl 0;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      .nav-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: $spacing-lg $spacing-md;
+        cursor: pointer;
+        transition: $transition-fast;
+        border-left: 4px solid transparent;
+        white-space: nowrap;
+        &:hover {
+          background: rgba($primary-teal, 0.1);
+          .nav-label {
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+        &.active {
+          background: rgba($primary-teal, 0.1);
+          border-left-color: $primary-teal;
+          font-weight: $font-weight-semibold;
+        }
+        .nav-icon {
+          margin: auto;
+          font-size: $font-size-lg;
+          flex-shrink: 0;
+          z-index: 101;
+        }
+        .nav-label {
+          position: absolute;
+          left: 70px;
+          top: 50%;
+          transform: translateY(-50%) translateX(-12px);
+          background: $white;
+          padding: $spacing-sm $spacing-lg;
+          border-radius: $radius-sm;
+          box-shadow: $shadow-md;
+          border: 1px solid $primary-dark;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.1s ease;
+          z-index: 9999;
+        }
+      }
+    }
+  }
+}
+
+// ===== Responsive Design =====
+@media (max-width: $breakpoint-md) {
+  .sidebar {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    border-right: none;
+    border-bottom: 2px solid $primary-dark;
+
+    .sidebar-nav ul .nav-item {
+      padding: $spacing-md $spacing-lg;
+
+      // モバイル時は常にラベルを表示（通常のインライン表示）
+      .nav-label {
+        position: static !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        background: transparent !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        transform: none !important;
+        margin-left: $spacing-md;
+      }
+    }
+  }
+}
