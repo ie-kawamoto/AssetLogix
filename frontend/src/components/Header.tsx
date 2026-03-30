@@ -13,7 +13,7 @@ function Header({ user, onLogout }: HeaderProps) {
         <img src={serviceLogo} alt="logo" className="header-logo" />
       </div>
       <div className="header-right">
-        <span className="user-info">Welcome, {user?.name || user?.email}</span>
+        <span className="user-info">ログイン中： {user?.name || user?.email}</span>
         <button onClick={onLogout} className="logout-button">Logout</button>
       </div>
     </header>

@@ -1,4 +1,8 @@
 import '../styles/Sidebar.scss';
+import dashboardIcon from '../assets/icons/dashboard.png';
+import assetIcon from '../assets/icons/asset.png';
+import userIcon from '../assets/icons/user.png';
+import settingIcon from '../assets/icons/setting.png';
 
 interface NavItem {
   icon: string;
@@ -7,22 +11,28 @@ interface NavItem {
 }
 
 interface SidebarProps {
-  navItems: NavItem[];
   onNavClick?: (label: string) => void;
 }
 
-function Sidebar({ navItems, onNavClick }: SidebarProps) {
+const defaultNavItems: NavItem[] = [
+  { icon: dashboardIcon, label: 'Dashboard', active: true },
+  { icon: assetIcon, label: 'Assets' },
+  { icon: userIcon, label: 'Users' },
+  { icon: settingIcon, label: 'Settings' },
+];
+
+function Sidebar({ onNavClick }: SidebarProps) {
   return (
     <aside className="sidebar">
       <nav className="sidebar-nav">
         <ul>
-          {navItems.map((item, index) => (
+          {defaultNavItems.map((item, index) => (
             <li
               key={index}
               className={`nav-item ${item.active ? 'active' : ''}`}
               onClick={() => onNavClick?.(item.label)}
             >
-              <span className="nav-icon">{item.icon}</span>
+              <img src={item.icon} alt={item.label} className="nav-icon" />
               <span className="nav-label">{item.label}</span>
             </li>
           ))}

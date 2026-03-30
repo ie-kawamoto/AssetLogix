@@ -17,12 +17,6 @@ interface Activity {
 }
 
 function Dashboard({ user, onLogout }: DashboardProps) {
-  const navItems = [
-    { icon: '📊', label: 'Dashboard', active: true },
-    { icon: '📦', label: 'Assets' },
-    { icon: '👥', label: 'Users' },
-    { icon: '⚙️', label: 'Settings' },
-  ];
 
   const cardData: Array<{
     key: string;
@@ -110,7 +104,7 @@ function Dashboard({ user, onLogout }: DashboardProps) {
       <Header user={user} onLogout={onLogout} />
 
       <div className="dashboard-body">
-        <Sidebar navItems={navItems} onNavClick={handleNavClick} />
+        <Sidebar onNavClick={handleNavClick} />
 
         <main className="main-content">
           <div className="content-wrapper">
