@@ -44,6 +44,13 @@
           border-left-color: $primary-teal;
           font-weight: $font-weight-semibold;
         }
+        .nav-link {
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+          color: inherit;
+          width: 100%;
+        }
         .nav-icon {
           margin: auto;
           width: 30px;

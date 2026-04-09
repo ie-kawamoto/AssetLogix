@@ -12,134 +12,204 @@ datasource db {
   url = env("DATABASE_URL")
 }
 
-model User {
-  id           Int          @id @default(autoincrement())
-  name         String
-  email        String       @unique
-  password     String
-  role         Role         @default(USER)
-  departmentId Int?
-  department   Department?  @relation(fields: [departmentId], references: [id])
-  rentals      Rental[]
-  reservations Reservation[]
-  notifications Notification[]
-  activityLogs ActivityLog[]
+model Organization {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String? @unique
 
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  users           User[]
+  departments     Department[]
+  categories      Category[]
+  items           Item[]
+  instances       Instance[]
+  locations       Location[]
+  rentals         Rental[]
+  reservations    Reservation[]
+  maintenanceLogs MaintenanceLog[]
+  notifications   Notification[]
+  activityLogs    ActivityLog[]
+  instanceLogs    InstanceLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id             Int          @id @default(autoincrement())
+  name           String
+  email          String       @unique
+  password       String
+  role           Role         @default(USER)
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  departmentId   Int?
+  department     Department?  @relation(fields: [departmentId], references: [id])
+  rentals        Rental[]
+  reservations   Reservation[]
+  notifications  Notification[]
+  activityLogs   ActivityLog[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Department {
-  id    Int    @id @default(autoincrement())
-  name  String
+  id             Int          @id @default(autoincrement())
+  name           String
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  users User[]
+  users          User[]
 
-  createdAt DateTime @default(now())
+  createdAt      DateTime     @default(now())
 }
 
 model Category {
-  id     Int     @id @default(autoincrement())
-  name   String
+  id             Int          @id @default(autoincrement())
+  name           String
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  assets Asset[]
+  items          Item[]
 }
 
-model Asset {
-  id          Int        @id @default(autoincrement())
-  name        String
-  categoryId  Int
-  category    Category   @relation(fields: [categoryId], references: [id])
+model Item {
+  id             Int          @id @default(autoincrement())
+  name           String
+  categoryId     Int
+  category       Category     @relation(fields: [categoryId], references: [id])
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  description    String?
 
-  status      AssetStatus @default(AVAILABLE)
-  location    String?
-  description String?
+  instances      Instance[]
 
-  rentals     Rental[]
-  reservations Reservation[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Instance {
+  id             Int          @id @default(autoincrement())
+  itemId         Int
+  item           Item         @relation(fields: [itemId], references: [id])
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  instanceName   String?
+  serialNumber   String?
+  status         InstanceStatus @default(AVAILABLE)
+  locationId     Int?
+  location       Location?     @relation(fields: [locationId], references: [id])
+  description    String?
+
+  rentals        Rental[]
+  reservations   Reservation[]
   maintenanceLogs MaintenanceLog[]
-  logs        AssetLog[]
+  logs           InstanceLog[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Location {
+  id             Int          @id @default(autoincrement())
+  name           String
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  instances      Instance[]
+
+  createdAt      DateTime     @default(now())
 }
 
 model Rental {
-  id         Int      @id @default(autoincrement())
-  assetId    Int
-  userId     Int
+  id             Int      @id @default(autoincrement())
+  instanceId     Int
+  userId         Int
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  asset      Asset    @relation(fields: [assetId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  instance       Instance @relation(fields: [instanceId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
 
-  rentedAt   DateTime @default(now())
-  dueDate    DateTime
-  returnedAt DateTime?
+  rentedAt       DateTime @default(now())
+  dueDate        DateTime
+  returnedAt     DateTime?
 
-  status     RentalStatus @default(RENTED)
+  status         RentalStatus @default(RENTED)
 
-  createdAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
 }
 
 model Reservation {
-  id        Int      @id @default(autoincrement())
-  assetId   Int
-  userId    Int
+  id             Int      @id @default(autoincrement())
+  instanceId     Int
+  userId         Int
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  asset     Asset    @relation(fields: [assetId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  instance       Instance @relation(fields: [instanceId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
 
-  startDate DateTime
-  endDate   DateTime
+  startDate      DateTime
+  endDate        DateTime
 
-  status    ReservationStatus @default(ACTIVE)
+  status         ReservationStatus @default(ACTIVE)
 }
 
 model MaintenanceLog {
-  id          Int      @id @default(autoincrement())
-  assetId     Int
+  id             Int      @id @default(autoincrement())
+  instanceId     Int
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  asset       Asset    @relation(fields: [assetId], references: [id])
+  instance       Instance @relation(fields: [instanceId], references: [id])
 
-  type        MaintenanceType
-  description String?
-  performedAt DateTime @default(now())
+  type           MaintenanceType
+  description    String?
+  performedAt    DateTime @default(now())
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    Int
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  user      User     @relation(fields: [userId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
 
-  type      NotificationType
-  message   String
-  isRead    Boolean  @default(false)
+  type           NotificationType
+  message        String
+  isRead         Boolean  @default(false)
 
-  createdAt DateTime @default(now())
+  createdAt      DateTime @default(now())
 }
 
 model ActivityLog {
-  id         Int      @id @default(autoincrement())
-  userId     Int
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  user       User     @relation(fields: [userId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
 
-  action     String
-  targetType String
-  targetId   Int?
+  action         String
+  targetType     String
+  targetId       Int?
 
-  createdAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
 }
 
-model AssetLog {
-  id        Int      @id @default(autoincrement())
-  assetId   Int
+model InstanceLog {
+  id             Int      @id @default(autoincrement())
+  instanceId     Int
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  asset     Asset    @relation(fields: [assetId], references: [id])
+  instance       Instance @relation(fields: [instanceId], references: [id])
 
-  status    AssetStatus
-  changedAt DateTime @default(now())
+  status         InstanceStatus
+  changedAt      DateTime @default(now())
 }
 
 
@@ -150,7 +220,7 @@ enum Role {
   GEST
 }
 
-enum AssetStatus {
+enum InstanceStatus {
   AVAILABLE
   RENTED
   BROKEN

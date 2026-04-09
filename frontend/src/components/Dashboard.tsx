@@ -93,18 +93,12 @@ function Dashboard({ user, onLogout }: DashboardProps) {
     setActiveCardKey(key);
   };
 
-
-  const handleNavClick = (label: string) => {
-    console.log('Nav clicked:', label);
-    // TODO: ナビゲーションのロジックを実装
-  };
-
   return (
     <div className="dashboard-container">
       <Header user={user} onLogout={onLogout} />
 
       <div className="dashboard-body">
-        <Sidebar onNavClick={handleNavClick} />
+        <Sidebar currentPage="Dashboard" />
 
         <main className="main-content">
           <div className="content-wrapper">

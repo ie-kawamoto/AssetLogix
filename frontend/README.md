@@ -1,75 +1,150 @@
-# React + TypeScript + Vite
+# 備品管理システム（Asset Logix）
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📝 概要
 
-Currently, two official plugins are available:
+社内で使用する備品を一元管理するためのWebアプリケーションです。
+備品の登録・貸出・返却・在庫状況を管理し、業務効率の向上を目的としています。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🚀 デモ
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+※準備中（デプロイ後にURLを記載）
 
-Note: This will impact Vite dev & build performances.
 
-## Expanding the ESLint configuration
+## 🛠️ 使用技術
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### フロントエンド
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* React
+* TypeScript
+* Vite
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### バックエンド
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Node.js
+* Express
+
+### データベース / ORM
+
+* Prisma
+* MySQL
+
+### その他
+
+* JWT認証
+* REST API
+
+---
+
+## ✨ 主な機能
+
+### ■ 認証・ユーザー管理
+
+* ログイン / ログアウト
+* ユーザー登録（管理者のみ）
+* 権限管理（管理者 / 一般ユーザー）
+
+### ■ 備品管理
+
+* 備品登録
+* 備品一覧表示
+* 備品詳細表示
+* 編集 / 削除
+* カテゴリ管理
+
+### ■ 貸出管理
+
+* 備品の貸出・返却処理
+* 貸出状況の一覧表示
+* ステータス管理（利用可 / 貸出中）
+
+---
+
+## 📂 ディレクトリ構成
+
+```
+project-root/
+├── frontend/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── hooks/
+│       ├── api/
+│       └── types/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── middleware/
+│   └── prisma/
+└── README.md
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ セットアップ方法
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### ① リポジトリをクローン
+
 ```
+git clone https://github.com/ユーザー名/リポジトリ名.git
+cd リポジトリ名
+```
+
+### ② フロントエンド
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
+### ③ バックエンド
+
+```
+cd backend
+npm install
+npx prisma generate
+npx prisma migrate dev
+npm run dev
+```
+
+---
+
+## 🔐 環境変数
+
+backend/.env を作成し、以下を設定してください。
+
+```
+DATABASE_URL=postgresql://ユーザー:パスワード@localhost:5432/db名
+JWT_SECRET=your_secret_key
+```
+
+---
+
+## 💡 工夫した点
+
+* Prismaを使用し、型安全なデータベース操作を実現
+* JWTによる認証機能でセキュアなログイン管理を実装
+* 管理者と一般ユーザーで権限を分け、実運用を想定した設計
+* フロントとバックエンドを分離し、保守性の高い構成に
+
+---
+
+## 📌 今後の改善点
+
+* 検索機能の追加
+* ページネーション対応
+* UI/UXの改善
+* テストコードの追加
+* Docker対応
+
+---
+
+## 👤 作者
+
+* GitHub: https://github.com/ie-kawamoto
+
+---

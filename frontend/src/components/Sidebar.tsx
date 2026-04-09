@@ -1,4 +1,5 @@
 import '../styles/Sidebar.scss';
+import { Link } from 'react-router-dom';
 import dashboardIcon from '../assets/icons/dashboard.png';
 import assetIcon from '../assets/icons/asset.png';
 import userIcon from '../assets/icons/user.png';
@@ -11,31 +12,46 @@ interface NavItem {
 }
 
 interface SidebarProps {
-  onNavClick?: (label: string) => void;
+  currentPage?: string;
 }
 
 const defaultNavItems: NavItem[] = [
-  { icon: dashboardIcon, label: 'Dashboard', active: true },
+  { icon: dashboardIcon, label: 'Dashboard' },
   { icon: assetIcon, label: 'Assets' },
   { icon: userIcon, label: 'Users' },
   { icon: settingIcon, label: 'Settings' },
 ];
 
-function Sidebar({ onNavClick }: SidebarProps) {
+function Sidebar({ currentPage = 'Dashboard' }: SidebarProps) {
+  const navItems = defaultNavItems.map(item => ({
+    ...item,
+    active: item.label === currentPage,
+  }));
   return (
     <aside className="sidebar">
       <nav className="sidebar-nav">
         <ul>
-          {defaultNavItems.map((item, index) => (
-            <li
-              key={index}
-              className={`nav-item ${item.active ? 'active' : ''}`}
-              onClick={() => onNavClick?.(item.label)}
-            >
-              <img src={item.icon} alt={item.label} className="nav-icon" />
-              <span className="nav-label">{item.label}</span>
-            </li>
-          ))}
+          {navItems.map((item, index) => {
+            const path = item.label === 'Dashboard' ? '/dashboard' : item.label === 'Assets' ? '/assets' : '#';
+            return (
+              <li
+                key={index}
+                className={`nav-item ${item.active ? 'active' : ''}`}
+              >
+                {path !== '#' ? (
+                  <Link to={path} className="nav-link">
+                    <img src={item.icon} alt={item.label} className="nav-icon" />
+                    <span className="nav-label">{item.label}</span>
+                  </Link>
+                ) : (
+                  <div className="nav-link">
+                    <img src={item.icon} alt={item.label} className="nav-icon" />
+                    <span className="nav-label">{item.label}</span>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </aside>

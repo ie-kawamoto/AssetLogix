@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './Login'
 import Dashboard from './Dashboard'
+import Assets from './Assets'
 import '../styles/App.scss'
 
 function App() {
@@ -10,15 +12,26 @@ function App() {
   useEffect(() => {
     const savedToken = localStorage.getItem('token')
     const savedUser = localStorage.getItem('user')
+
     if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
+      try {
+        const parsedUser = JSON.parse(savedUser)
+        setToken(savedToken)
+        setUser(parsedUser)
+      } catch (error) {
+        console.error('Failed to restore session:', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
     }
 
     fetch('http://localhost:3000/api/test')
       .then(res => res.json())
       .then(data => {
         console.log(data)
+      })
+      .catch(error => {
+        console.error('API health check failed:', error)
       })
   }, [])
 
@@ -40,7 +53,14 @@ function App() {
     return <Login onLogin={handleLogin} />
   }
 
-  return <Dashboard user={user} onLogout={handleLogout} />
+  return (
+    <Routes>
+      <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+      <Route path="/assets" element={<Assets user={user} onLogout={handleLogout} />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  )
 }
 
 export default App

@@ -51,6 +51,7 @@
   input {
     @include input-base;
     background-color: var(--bs-gray);
+    color: $text-dark;
 
     &:focus {
       outline: none;
