@@ -29,6 +29,8 @@ model Organization {
   notifications   Notification[]
   activityLogs    ActivityLog[]
   instanceLogs    InstanceLog[]
+  borrowers       Borrower[]
+  loans           Loan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +108,7 @@ model Instance {
   reservations   Reservation[]
   maintenanceLogs MaintenanceLog[]
   logs           InstanceLog[]
+  loans          Loan[]
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -246,4 +249,54 @@ enum MaintenanceType {
 enum NotificationType {
   DUE_SOON
   OVERDUE
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+model Borrower {
+  id             Int          @id @default(autoincrement())
+  name           String
+  type           BorrowerType
+  departmentId   Int?
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  contactInfo    String?
+  notes          String?
+  
+  loans          Loan[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+enum BorrowerType {
+  INTERNAL_DEPARTMENT
+  EXTERNAL_ORGANIZATION
+  INDIVIDUAL
+}
+
+model Loan {
+  id             Int         @id @default(autoincrement())
+  instanceId     Int
+  borrowerId     Int
+  organizationId Int
+  
+  instance       Instance    @relation(fields: [instanceId], references: [id])
+  borrower       Borrower    @relation(fields: [borrowerId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  loanDate       DateTime    @default(now())
+  dueDate        DateTime
+  returnDate     DateTime?
+  
+  status         LoanStatus  @default(ACTIVE)
+  notes          String?
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }

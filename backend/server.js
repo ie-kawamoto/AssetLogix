@@ -32,6 +32,14 @@ app.use(cors({
 
 app.use(express.json());
 
+const getDateStart = (value) => {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const isPastDueDate = (value) => getDateStart(value) < getDateStart(new Date());
+
 // 認証ミドルウェア
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -428,6 +436,367 @@ app.delete('/api/locations/:id', authenticateToken, async (req, res) => {
       where: { id: parseInt(id), organizationId: req.user.organizationId }
     });
     res.json({ message: 'Location deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+// Borrower endpoints (貸出先管理)
+app.get('/api/borrowers', authenticateToken, async (req, res) => {
+  try {
+    const borrowers = await prisma.borrower.findMany({
+      where: { organizationId: req.user.organizationId },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(borrowers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.get('/api/borrowers/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const borrower = await prisma.borrower.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        loans: {
+          include: {
+            instance: {
+              include: {
+                item: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!borrower || borrower.organizationId !== req.user.organizationId) {
+      return res.status(404).json({ error: '見つかりません' });
+    }
+
+    res.json(borrower);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.post('/api/borrowers', authenticateToken, async (req, res) => {
+  const { name, type, departmentId, contactInfo, notes } = req.body;
+
+  try {
+    const borrower = await prisma.borrower.create({
+      data: {
+        name,
+        type,
+        departmentId,
+        contactInfo,
+        notes,
+        organizationId: req.user.organizationId
+      }
+    });
+    res.json(borrower);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.put('/api/borrowers/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { name, type, departmentId, contactInfo, notes } = req.body;
+  const borrowerId = parseInt(id, 10);
+
+  try {
+    const existingBorrower = await prisma.borrower.findFirst({
+      where: {
+        id: borrowerId,
+        organizationId: req.user.organizationId
+      }
+    });
+
+    if (!existingBorrower) {
+      return res.status(404).json({ error: '見つかりません' });
+    }
+
+    const borrower = await prisma.borrower.update({
+      where: { id: borrowerId },
+      data: {
+        name,
+        type,
+        departmentId,
+        contactInfo,
+        notes
+      }
+    });
+    res.json(borrower);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.delete('/api/borrowers/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const borrowerId = parseInt(id, 10);
+
+  try {
+    const existingBorrower = await prisma.borrower.findFirst({
+      where: {
+        id: borrowerId,
+        organizationId: req.user.organizationId
+      },
+      include: {
+        loans: {
+          where: {
+            status: 'ACTIVE'
+          }
+        }
+      }
+    });
+
+    if (!existingBorrower) {
+      return res.status(404).json({ error: '見つかりません' });
+    }
+
+    if (existingBorrower.loans.length > 0) {
+      return res.status(400).json({ error: '貸出中の記録があるため削除できません' });
+    }
+
+    await prisma.borrower.delete({
+      where: { id: borrowerId }
+    });
+    res.json({ message: 'Borrower deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+// Loan endpoints (貸し出し管理)
+app.get('/api/loans', authenticateToken, async (req, res) => {
+  try {
+    const loans = await prisma.loan.findMany({
+      where: { organizationId: req.user.organizationId },
+      include: {
+        instance: {
+          include: {
+            item: {
+              include: {
+                category: true
+              }
+            }
+          }
+        },
+        borrower: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(loans);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.get('/api/loans/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const loan = await prisma.loan.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        instance: {
+          include: {
+            item: {
+              include: {
+                category: true
+              }
+            }
+          }
+        },
+        borrower: true
+      }
+    });
+
+    if (!loan || loan.organizationId !== req.user.organizationId) {
+      return res.status(404).json({ error: '見つかりません' });
+    }
+
+    res.json(loan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.post('/api/loans', authenticateToken, async (req, res) => {
+  const { instanceId, borrowerId, dueDate, notes } = req.body;
+  const parsedDueDate = new Date(dueDate);
+  const status = isPastDueDate(parsedDueDate) ? 'OVERDUE' : 'ACTIVE';
+
+  try {
+    // Check if instance exists and is available
+    const instance = await prisma.instance.findUnique({
+      where: { id: parseInt(instanceId) }
+    });
+
+    if (!instance || instance.organizationId !== req.user.organizationId) {
+      return res.status(404).json({ error: 'アイテムが見つかりません' });
+    }
+
+    if (instance.status !== 'AVAILABLE') {
+      return res.status(400).json({ error: 'このアイテムは貸出可能ではありません' });
+    }
+
+    // Create loan
+    const loan = await prisma.loan.create({
+      data: {
+        instanceId: parseInt(instanceId),
+        borrowerId: parseInt(borrowerId),
+        dueDate: parsedDueDate,
+        status,
+        notes,
+        organizationId: req.user.organizationId
+      },
+      include: {
+        instance: {
+          include: {
+            item: {
+              include: {
+                category: true
+              }
+            }
+          }
+        },
+        borrower: true
+      }
+    });
+
+    // Update instance status to RENTED
+    await prisma.instance.update({
+      where: { id: parseInt(instanceId) },
+      data: { status: 'RENTED' }
+    });
+
+    res.json(loan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.put('/api/loans/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { status, dueDate } = req.body;
+  const loanId = parseInt(id, 10);
+
+  try {
+    const loan = await prisma.loan.findFirst({
+      where: { id: loanId, organizationId: req.user.organizationId },
+      include: { instance: true }
+    });
+
+    if (!loan) {
+      return res.status(404).json({ error: '見つかりません' });
+    }
+
+    const updateData = {};
+    const nextDueDate = dueDate !== undefined ? new Date(dueDate) : loan.dueDate;
+    const requestedStatus = status !== undefined ? status : loan.status;
+    const nextStatus = requestedStatus === 'RETURNED'
+      ? 'RETURNED'
+      : (isPastDueDate(nextDueDate) ? 'OVERDUE' : requestedStatus);
+
+    if (dueDate !== undefined) {
+      updateData.dueDate = nextDueDate;
+    }
+    if (status !== undefined || dueDate !== undefined) {
+      updateData.status = nextStatus;
+      // ステータスに合わせてインスタンス状態を同期
+      if (nextStatus === 'RETURNED' && loan.status !== 'RETURNED') {
+        updateData.returnDate = new Date();
+        await prisma.instance.update({
+          where: { id: loan.instanceId },
+          data: { status: 'AVAILABLE' }
+        });
+      } else if (nextStatus !== 'RETURNED' && loan.status === 'RETURNED') {
+        updateData.returnDate = null;
+        await prisma.instance.update({
+          where: { id: loan.instanceId },
+          data: { status: 'RENTED' }
+        });
+      }
+    }
+
+    const updated = await prisma.loan.update({
+      where: { id: loanId },
+      data: updateData,
+      include: {
+        instance: { include: { item: { include: { category: true } } } },
+        borrower: true
+      }
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.post('/api/loans/:id/return', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const loan = await prisma.loan.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        instance: true
+      }
+    });
+
+    if (!loan || loan.organizationId !== req.user.organizationId) {
+      return res.status(404).json({ error: '見つかりません' });
+    }
+
+    if (loan.status === 'RETURNED') {
+      return res.status(400).json({ error: 'すでに返却されています' });
+    }
+
+    // Update loan status
+    const updatedLoan = await prisma.loan.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: 'RETURNED',
+        returnDate: new Date()
+      },
+      include: {
+        instance: {
+          include: {
+            item: {
+              include: {
+                category: true
+              }
+            }
+          }
+        },
+        borrower: true
+      }
+    });
+
+    // Update instance status to AVAILABLE
+    await prisma.instance.update({
+      where: { id: loan.instanceId },
+      data: { status: 'AVAILABLE' }
+    });
+
+    res.json(updatedLoan);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'サーバーエラー' });

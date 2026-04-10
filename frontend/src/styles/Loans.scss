@@ -1,0 +1,840 @@
+@import 'variables';
+
+.loans-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $primary-dark 0%, $primary-teal 100%);
+  font-family: $font-sans;
+  display: flex;
+  flex-direction: column;
+}
+
+.loans-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  margin-top: 80px;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 60px;
+  height: calc(100vh - 80px);
+  background: $bg-light;
+  padding: $spacing-2xl;
+  overflow-y: auto;
+
+  .content-wrapper {
+    width: 1400px;
+    max-width: 90%;
+    margin: 0 auto;
+
+    .page-title {
+      color: $text-dark;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      margin-bottom: $spacing-xl;
+      text-align: left;
+      padding: 0.5rem 1rem;
+      border-left: 5px solid $primary-teal;
+      border-bottom: 2px solid $primary-teal;
+
+      span {
+        font-size: $font-size-base;
+        color: $text-light;
+      }
+    }
+
+    .loans-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-xl;
+      gap: $spacing-lg;
+
+      .search-filter-group {
+        display: flex;
+        gap: $spacing-md;
+        align-items: center;
+        flex: 1;
+        max-width: 640px;
+      }
+
+      .search-container {
+        flex: 1;
+        max-width: 400px;
+
+        .search-input {
+          width: 100%;
+          padding: $spacing-md;
+          border: 2px solid $border-light;
+          border-radius: $radius-md;
+          font-size: $font-size-base;
+          background: $white;
+          color: $text-dark;
+          transition: border-color 0.2s ease;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-teal;
+          }
+        }
+      }
+
+      .status-filter-container {
+        .status-filter-select {
+          padding: $spacing-md;
+          border: 2px solid $border-light;
+          border-radius: $radius-md;
+          font-size: $font-size-base;
+          background: $white;
+          color: $text-dark;
+          cursor: pointer;
+          transition: border-color 0.2s ease;
+          white-space: nowrap;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-teal;
+          }
+        }
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: $spacing-md;
+
+        .action-button {
+          padding: $spacing-md $spacing-lg;
+          border: none;
+          border-radius: $radius-md;
+          font-weight: $font-weight-semibold;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &.register-button {
+            background: $primary-teal-dark;
+            color: $white;
+
+            &:hover {
+              background: $primary-teal;
+            }
+          }
+
+          &.borrower-button {
+            background: $primary-blue;
+            color: $white;
+
+            &:hover {
+              background: $primary-blue-light;
+            }
+          }
+        }
+      }
+    }
+
+    .loans-list {
+      .loading,
+      .empty-state {
+        text-align: center;
+        padding: $spacing-3xl;
+        color: $text-light;
+        font-size: $font-size-lg;
+      }
+
+      .loan-records-card {
+        background: $white;
+        border-radius: $radius-md;
+        border: 2px solid $primary-dark;
+        border-left: 5px solid $primary-dark;
+        box-shadow: $shadow-md;
+        overflow: hidden;
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+
+          thead {
+            background: rgba($primary-dark, 0.95);
+            color: $white;
+
+            th {
+              padding: $spacing-md $spacing-lg;
+              text-align: center;
+              font-weight: $font-weight-semibold;
+              font-size: $font-size-base;
+              border-bottom: 1px solid rgba($white, 0.15);
+            }
+          }
+
+          tbody {
+            tr {
+              border-bottom: 1px solid $border-light;
+              transition: background-color 0.2s ease;
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              &:hover {
+                background: $bg-light;
+              }
+
+              td {
+                padding: $spacing-md $spacing-lg;
+                color: $text-dark;
+                vertical-align: middle;
+                font-size: $font-size-base;
+
+                &:last-child {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: $spacing-sm;
+                  align-items: center;
+                }
+
+                &:first-child {
+                  color: $primary-teal;
+                  font-weight: $font-weight-semibold;
+                  max-width: 180px;
+                }
+
+                .loan-item-name {
+                  display: block;
+                  color: $primary-teal;
+                  font-weight: $font-weight-semibold;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                }
+
+                .loan-instance-name {
+                  display: block;
+                  color: $text-light;
+                  font-size: $font-size-sm;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  margin-top: 2px;
+                }
+
+                .action-button {
+                  padding: $spacing-sm $spacing-md;
+                  border: none;
+                  border-radius: $radius-sm;
+                  font-size: $font-size-sm;
+                  font-weight: $font-weight-semibold;
+                  cursor: pointer;
+                  transition: all 0.2s ease;
+
+                  &.return-button {
+                    background: $primary-teal;
+                    color: $white;
+
+                    &:hover {
+                      background: $primary-teal-dark;
+                      transform: translateY(-1px);
+                    }
+
+                    &:active {
+                      transform: translateY(0);
+                    }
+                  }
+
+                  &.edit-button {
+                    background: $primary-blue;
+                    color: $white;
+
+                    &:hover {
+                      background: $primary-blue-light;
+                      transform: translateY(-1px);
+                    }
+
+                    &:active {
+                      transform: translateY(0);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+
+  &.status-active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.status-returned {
+    background-color: #e8f5e9;
+    color: #388e3c;
+  }
+
+  &.status-overdue {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: $spacing-lg;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
+
+  button {
+    padding: $spacing-sm $spacing-md;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    font-size: $font-size-sm;
+
+    &:hover {
+      background-color: darken(#d32f2f, 10%);
+    }
+  }
+}
+
+.text-muted {
+  color: $text-light;
+}
+
+.borrower-manage-modal {
+  max-width: 700px;
+}
+
+.borrower-section {
+  margin-bottom: $spacing-xl;
+
+  h3 {
+    margin: 0 0 $spacing-md 0;
+    color: $text-dark;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.borrower-loading,
+.borrower-empty {
+  margin: 0;
+  color: $text-light;
+}
+
+.borrower-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.borrower-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  background: $white;
+}
+
+.borrower-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.borrower-name {
+  margin: 0;
+  color: $text-dark;
+  font-weight: $font-weight-semibold;
+}
+
+.borrower-meta {
+  margin: $spacing-xs 0 0 0;
+  color: $text-light;
+  font-size: $font-size-sm;
+}
+
+.borrower-row-actions {
+  display: flex;
+  gap: $spacing-sm;
+  flex-shrink: 0;
+
+  button {
+    padding: $spacing-sm $spacing-md;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-edit {
+    background: $primary-blue;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: $primary-blue-light;
+    }
+  }
+
+  .btn-delete {
+    background: $primary-led;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      opacity: 0.85;
+    }
+  }
+
+  .btn-save {
+    background: $primary-teal;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: $primary-teal-dark;
+    }
+  }
+
+  .btn-cancel {
+    background: $text-light;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: darken($text-light, 10%);
+    }
+  }
+}
+
+.borrower-edit-fields {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-sm;
+
+  input,
+  select {
+    width: 100%;
+    padding: $spacing-md;
+    border: 2px solid $border-light;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    font-family: $font-sans;
+    background: $white;
+    color: $text-dark;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-teal;
+    }
+  }
+}
+
+.borrower-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.borrower-create-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-sm;
+
+  input,
+  select {
+    width: 100%;
+    padding: $spacing-md;
+    border: 2px solid $border-light;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    font-family: $font-sans;
+    background: $white;
+    color: $text-dark;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-teal;
+    }
+  }
+}
+
+.borrower-create-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  .btn-add {
+    padding: $spacing-sm $spacing-lg;
+    border: none;
+    border-radius: $radius-sm;
+    background: $primary-teal-dark;
+    color: $white;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: $primary-teal;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .loans-body {
+    flex-direction: column;
+    margin-top: 80px;
+  }
+
+  .main-content {
+    margin-left: 0;
+    height: auto;
+    padding: $spacing-lg;
+  }
+
+  .loans-controls {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-container {
+      max-width: none;
+    }
+
+    .action-buttons {
+      justify-content: center;
+    }
+  }
+
+  .loan-records-card {
+    overflow-x: auto;
+
+    table {
+      min-width: 780px;
+    }
+  }
+
+  .modal-content {
+    width: 95%;
+  }
+
+  .borrower-row {
+    flex-direction: column;
+  }
+
+  .borrower-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .borrower-edit-fields,
+  .borrower-create-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Modal styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: $white;
+  border-radius: $radius-lg;
+  padding: $spacing-2xl;
+  max-width: 700px;
+  width: 90%;
+  max-height: 80vh;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+  border-bottom: 2px solid $border-light;
+  padding-bottom: $spacing-lg;
+
+  h2 {
+    margin: 0;
+    color: $text-dark;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: $font-size-xl;
+    cursor: pointer;
+    color: $text-light;
+    padding: $spacing-sm;
+    border-radius: $radius-sm;
+
+    &:hover {
+      background: $border-light;
+      color: $text-dark;
+    }
+  }
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba($text-light, 0.35) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($text-light, 0.4);
+    border-radius: $radius-sm;
+
+    &:hover {
+      background: rgba($text-light, 0.45);
+    }
+  }
+
+  &.modal-loading {
+    text-align: center;
+    color: $text-light;
+  }
+
+  .form-group {
+    margin-bottom: $spacing-lg;
+
+    label {
+      display: block;
+      margin-bottom: $spacing-sm;
+      color: $text-dark;
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-sm;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: $spacing-md;
+      border: 2px solid $border-light;
+      border-radius: $radius-md;
+      font-size: $font-size-base;
+      font-family: $font-sans;
+      background: $white;
+      color: $text-dark;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-teal;
+      }
+
+      &:disabled {
+        background-color: $bg-light;
+        color: $text-light;
+        cursor: not-allowed;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+  }
+}
+
+.date-selects {
+  display: flex;
+  gap: $spacing-sm;
+
+  select {
+    flex: 1;
+    padding: $spacing-md;
+    border: 2px solid $border-light;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    font-family: $font-sans;
+    background: $white;
+    color: $text-dark;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-teal;
+    }
+  }
+}
+
+.return-confirm-modal {
+  max-width: 480px;
+}
+
+.loan-edit-info {
+  background: $bg-light;
+  border: 1px solid $border-light;
+  border-left: 4px solid $primary-teal;
+  border-radius: $radius-md;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.loan-edit-info-row {
+  display: flex;
+  gap: $spacing-md;
+  font-size: $font-size-base;
+}
+
+.loan-edit-info-label {
+  color: $text-light;
+  flex-shrink: 0;
+  width: 110px;
+}
+
+.loan-edit-info-value {
+  color: $text-dark;
+  font-weight: $font-weight-semibold;
+}
+
+.return-confirm-message {
+  margin: 0 0 $spacing-lg 0;
+  color: $text-dark;
+  font-size: $font-size-base;
+}
+
+.return-confirm-detail {
+  background: $bg-light;
+  border: 1px solid $border-light;
+  border-left: 4px solid $primary-teal;
+  border-radius: $radius-md;
+  padding: $spacing-md $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.return-confirm-row {
+  display: flex;
+  gap: $spacing-md;
+  font-size: $font-size-base;
+}
+
+.return-confirm-label {
+  color: $text-light;
+  flex-shrink: 0;
+  width: 110px;
+}
+
+.return-confirm-value {
+  color: $text-dark;
+  font-weight: $font-weight-semibold;
+}
+
+.modal-error {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin: $spacing-lg;
+  font-size: $font-size-sm;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  border-top: 1px solid $border-light;
+  flex-shrink: 0;
+
+  .btn {
+    padding: $spacing-sm $spacing-lg;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    transition: all 0.3s ease;
+
+    &.btn-primary {
+      background-color: $primary-teal;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: darken($primary-teal, 10%);
+      }
+    }
+
+    &.btn-secondary {
+      background: $border-light;
+      color: $text-dark;
+
+      &:hover {
+        background: $border-gray;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}

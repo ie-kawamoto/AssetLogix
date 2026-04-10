@@ -18,7 +18,7 @@ interface SidebarProps {
 const defaultNavItems: NavItem[] = [
   { icon: dashboardIcon, label: 'Dashboard' },
   { icon: assetIcon, label: 'Assets' },
-  { icon: userIcon, label: 'Users' },
+  { icon: userIcon, label: 'Loans' },
   { icon: settingIcon, label: 'Settings' },
 ];
 
@@ -32,7 +32,11 @@ function Sidebar({ currentPage = 'Dashboard' }: SidebarProps) {
       <nav className="sidebar-nav">
         <ul>
           {navItems.map((item, index) => {
-            const path = item.label === 'Dashboard' ? '/dashboard' : item.label === 'Assets' ? '/assets' : '#';
+            let path = '#';
+            if (item.label === 'Dashboard') path = '/dashboard';
+            else if (item.label === 'Assets') path = '/assets';
+            else if (item.label === 'Loans') path = '/loans';
+            
             return (
               <li
                 key={index}
