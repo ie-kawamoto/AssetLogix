@@ -2,6 +2,7 @@ import '../styles/Sidebar.scss';
 import { Link } from 'react-router-dom';
 import dashboardIcon from '../assets/icons/dashboard.png';
 import assetIcon from '../assets/icons/asset.png';
+import listIcon from '../assets/icons/list.png';
 import userIcon from '../assets/icons/user.png';
 import settingIcon from '../assets/icons/setting.png';
 
@@ -18,7 +19,8 @@ interface SidebarProps {
 const defaultNavItems: NavItem[] = [
   { icon: dashboardIcon, label: 'Dashboard' },
   { icon: assetIcon, label: 'Assets' },
-  { icon: userIcon, label: 'Loans' },
+  { icon: listIcon, label: 'Loans' },
+  { icon: userIcon, label: 'Users' },
   { icon: settingIcon, label: 'Settings' },
 ];
 
@@ -36,6 +38,7 @@ function Sidebar({ currentPage = 'Dashboard' }: SidebarProps) {
             if (item.label === 'Dashboard') path = '/dashboard';
             else if (item.label === 'Assets') path = '/assets';
             else if (item.label === 'Loans') path = '/loans';
+            else if (item.label === 'Users') path = '/users';
             
             return (
               <li

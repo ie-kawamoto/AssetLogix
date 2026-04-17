@@ -58,6 +58,28 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+const normalizeRole = (role) => {
+  if (!role) return role;
+  if (role === 'GUEST') return 'GEST';
+  return role;
+};
+
+const isSystemAdmin = (role) => role === 'ADMIN';
+const isOrganizationAdmin = (role) => role === 'USER';
+const isGuestUser = (role) => role === 'GEST' || role === 'GUEST';
+const canManageUsers = (role) => isSystemAdmin(role) || isOrganizationAdmin(role);
+
+const toSafeUser = (user) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  organizationId: user.organizationId,
+  organizationName: user.organization?.name || null,
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
+});
+
 // ログインエンドポイント
 app.post('/api/login', async (req, res) => {
   console.log('Login request received:', req.body);
@@ -103,6 +125,419 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API OK' });
+});
+
+// Organization endpoint (system admin only)
+app.get('/api/organizations', authenticateToken, async (req, res) => {
+  if (!isSystemAdmin(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  try {
+    const organizations = await prisma.organization.findMany({
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+    res.json(organizations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.post('/api/organizations', authenticateToken, async (req, res) => {
+  if (!isSystemAdmin(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  const { name, email } = req.body;
+  const normalizedName = typeof name === 'string' ? name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : null;
+  const emailValue = normalizedEmail || null;
+
+  if (!normalizedName) {
+    return res.status(400).json({ error: '組織名は必須です' });
+  }
+
+  try {
+    const existingOrg = await prisma.organization.findFirst({
+      where: { name: normalizedName },
+      select: { id: true },
+    });
+
+    if (existingOrg) {
+      return res.status(409).json({ error: '同じ名前の組織が既に存在します' });
+    }
+
+    if (emailValue) {
+      const existingEmail = await prisma.organization.findFirst({
+        where: { email: emailValue },
+        select: { id: true },
+      });
+
+      if (existingEmail) {
+        return res.status(409).json({ error: '同じメールアドレスの組織が既に存在します' });
+      }
+    }
+
+    const organization = await prisma.organization.create({
+      data: {
+        name: normalizedName,
+        email: emailValue,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    res.status(201).json(organization);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.put('/api/organizations/:id', authenticateToken, async (req, res) => {
+  if (!isSystemAdmin(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  const organizationId = Number(req.params.id);
+  if (Number.isNaN(organizationId)) {
+    return res.status(400).json({ error: '組織IDが不正です' });
+  }
+
+  const { name, email } = req.body;
+  const normalizedName = typeof name === 'string' ? name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : null;
+  const emailValue = normalizedEmail || null;
+
+  if (!normalizedName) {
+    return res.status(400).json({ error: '組織名は必須です' });
+  }
+
+  try {
+    const existingOrg = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true },
+    });
+
+    if (!existingOrg) {
+      return res.status(404).json({ error: '組織が見つかりません' });
+    }
+
+    const duplicateName = await prisma.organization.findFirst({
+      where: {
+        name: normalizedName,
+        id: { not: organizationId },
+      },
+      select: { id: true },
+    });
+
+    if (duplicateName) {
+      return res.status(409).json({ error: '同じ名前の組織が既に存在します' });
+    }
+
+    if (emailValue) {
+      const duplicateEmail = await prisma.organization.findFirst({
+        where: {
+          email: emailValue,
+          id: { not: organizationId },
+        },
+        select: { id: true },
+      });
+
+      if (duplicateEmail) {
+        return res.status(409).json({ error: '同じメールアドレスの組織が既に存在します' });
+      }
+    }
+
+    const updatedOrg = await prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        name: normalizedName,
+        email: emailValue,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    res.json(updatedOrg);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.delete('/api/organizations/:id', authenticateToken, async (req, res) => {
+  if (!isSystemAdmin(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  const organizationId = Number(req.params.id);
+  if (Number.isNaN(organizationId)) {
+    return res.status(400).json({ error: '組織IDが不正です' });
+  }
+
+  try {
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        id: true,
+        _count: {
+          select: { users: true },
+        },
+      },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: '組織が見つかりません' });
+    }
+
+    if (organization._count.users > 0) {
+      return res.status(409).json({ error: 'この組織にはユーザーが所属しているため削除できません' });
+    }
+
+    await prisma.organization.delete({
+      where: { id: organizationId },
+    });
+
+    res.json({ message: '組織を削除しました' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+// User endpoints
+app.get('/api/users', authenticateToken, async (req, res) => {
+  try {
+    const whereClause = isSystemAdmin(req.user.role)
+      ? {}
+      : { organizationId: req.user.organizationId };
+
+    const users = await prisma.user.findMany({
+      where: whereClause,
+      include: {
+        organization: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ organizationId: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    res.json(users.map(toSafeUser));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.post('/api/users', authenticateToken, async (req, res) => {
+  if (!canManageUsers(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  const { name, email, password, role, organizationId } = req.body;
+  const normalizedRole = normalizeRole(role);
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: '名前、メールアドレス、パスワードは必須です' });
+  }
+
+  if (!['ADMIN', 'USER', 'GEST'].includes(normalizedRole)) {
+    return res.status(400).json({ error: 'ロールが不正です' });
+  }
+
+  if (!isSystemAdmin(req.user.role) && normalizedRole === 'ADMIN') {
+    return res.status(403).json({ error: 'ADMINロールは作成できません' });
+  }
+
+  const targetOrganizationId = isSystemAdmin(req.user.role)
+    ? Number(organizationId)
+    : req.user.organizationId;
+
+  if (!targetOrganizationId || Number.isNaN(targetOrganizationId)) {
+    return res.status(400).json({ error: '組織IDが不正です' });
+  }
+
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ error: '同じメールアドレスのユーザーが存在します' });
+    }
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: targetOrganizationId },
+      select: { id: true },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: '組織が見つかりません' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const createdUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: normalizedRole,
+        organizationId: targetOrganizationId,
+      },
+      include: {
+        organization: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json(toSafeUser(createdUser));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.put('/api/users/:id', authenticateToken, async (req, res) => {
+  if (!canManageUsers(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  const targetUserId = Number(req.params.id);
+  if (Number.isNaN(targetUserId)) {
+    return res.status(400).json({ error: 'ユーザーIDが不正です' });
+  }
+
+  const { name, email, password, role, organizationId } = req.body;
+  const normalizedRole = role ? normalizeRole(role) : undefined;
+
+  if (normalizedRole && !['ADMIN', 'USER', 'GEST'].includes(normalizedRole)) {
+    return res.status(400).json({ error: 'ロールが不正です' });
+  }
+
+  try {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        role: true,
+        organizationId: true,
+      },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+    }
+
+    if (!isSystemAdmin(req.user.role) && targetUser.organizationId !== req.user.organizationId) {
+      return res.status(403).json({ error: '他組織のユーザーは更新できません' });
+    }
+
+    if (!isSystemAdmin(req.user.role)) {
+      if (targetUser.role === 'ADMIN') {
+        return res.status(403).json({ error: 'ADMINユーザーは更新できません' });
+      }
+      if (normalizedRole === 'ADMIN') {
+        return res.status(403).json({ error: 'ADMINロールへ変更できません' });
+      }
+    }
+
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (normalizedRole !== undefined) updateData.role = normalizedRole;
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    // アカウント作成後の所属組織変更は禁止
+    if (organizationId !== undefined && Number(organizationId) !== targetUser.organizationId) {
+      return res.status(400).json({ error: '登録後に所属組織は変更できません' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: targetUserId },
+      data: updateData,
+      include: {
+        organization: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    res.json(toSafeUser(updatedUser));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.delete('/api/users/:id', authenticateToken, async (req, res) => {
+  if (!canManageUsers(req.user.role)) {
+    return res.status(403).json({ error: 'この操作を実行する権限がありません' });
+  }
+
+  const targetUserId = Number(req.params.id);
+  if (Number.isNaN(targetUserId)) {
+    return res.status(400).json({ error: 'ユーザーIDが不正です' });
+  }
+
+  if (targetUserId === req.user.userId) {
+    return res.status(400).json({ error: '自分自身は削除できません' });
+  }
+
+  try {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        role: true,
+        organizationId: true,
+      },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+    }
+
+    if (!isSystemAdmin(req.user.role) && targetUser.organizationId !== req.user.organizationId) {
+      return res.status(403).json({ error: '他組織のユーザーは削除できません' });
+    }
+
+    if (!isSystemAdmin(req.user.role) && targetUser.role === 'ADMIN') {
+      return res.status(403).json({ error: 'ADMINユーザーは削除できません' });
+    }
+
+    await prisma.user.delete({
+      where: { id: targetUserId },
+    });
+
+    res.json({ message: 'User deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
 });
 
 // Item endpoints

@@ -1,0 +1,699 @@
+@import "variables";
+
+.users-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $primary-dark 0%, $primary-teal 100%);
+  font-family: $font-sans;
+  display: flex;
+  flex-direction: column;
+
+  .users-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    margin-top: 80px;
+  }
+
+  .main-content {
+    flex: 1;
+    margin-left: 60px;
+    height: calc(100vh - 80px);
+    background: $bg-light;
+    padding: $spacing-2xl;
+    overflow-y: auto;
+
+    .content-wrapper {
+      width: 1400px;
+      max-width: 90%;
+      margin: 0 auto;
+
+      .page-title {
+        color: $text-dark;
+        font-size: $font-size-xl;
+        font-weight: $font-weight-semibold;
+        margin-bottom: $spacing-xl;
+        text-align: left;
+        padding: 0.5rem 1rem;
+        border-left: 5px solid $primary-teal;
+        border-bottom: 2px solid $primary-teal;
+
+        span {
+          font-size: $font-size-base;
+          color: $text-light;
+        }
+      }
+
+      .role-description-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: $spacing-md;
+        margin-bottom: $spacing-xl;
+
+        .role-card {
+          background: $white;
+          border-radius: $radius-md;
+          border: 2px solid $border-light;
+          padding: $spacing-lg;
+          text-align: left;
+
+          h3 {
+            margin: 0 0 $spacing-sm;
+            font-size: $font-size-lg;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+          }
+
+          p {
+            color: $text-light;
+            font-size: $font-size-sm;
+          }
+
+          &.role-admin {
+            border-color: rgba(112, 48, 160, 0.4);
+            h3 {
+              color: #7030a0;
+            }
+          }
+
+          &.role-user {
+            border-color: rgba($primary-blue, 0.45);
+            h3 {
+              color: $primary-blue;
+            }
+          }
+
+          &.role-gest {
+            border-color: rgba($primary-teal, 0.45);
+            h3 {
+              color: $primary-teal-dark;
+            }
+          }
+        }
+      }
+
+      .users-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: $spacing-lg;
+        margin-bottom: $spacing-lg;
+
+        .search-filter-group {
+          display: flex;
+          gap: $spacing-md;
+          align-items: center;
+          flex: 1;
+          max-width: 640px;
+
+          .search-container {
+            flex: 1;
+            max-width: 400px;
+
+            .search-input {
+              width: 100%;
+              padding: $spacing-md;
+              border: 2px solid $border-light;
+              border-radius: $radius-md;
+              font-size: $font-size-base;
+              background: $white;
+              color: $text-dark;
+              transition: border-color 0.2s ease;
+
+              &:focus {
+                outline: none;
+                border-color: $primary-teal;
+              }
+            }
+          }
+
+          .filter-container {
+            .org-filter-select {
+              padding: $spacing-md;
+              border: 2px solid $border-light;
+              border-radius: $radius-md;
+              font-size: $font-size-base;
+              background: $white;
+              color: $text-dark;
+              cursor: pointer;
+              transition: border-color 0.2s ease;
+              white-space: nowrap;
+
+              &:focus {
+                outline: none;
+                border-color: $primary-teal;
+              }
+            }
+          }
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: $spacing-md;
+        }
+
+        .action-button {
+          border: none;
+          border-radius: $radius-md;
+          padding: $spacing-md $spacing-xl;
+          color: $white;
+          background: $primary-teal-dark;
+          cursor: pointer;
+          font-weight: $font-weight-semibold;
+
+          &:hover {
+            background: $primary-teal;
+          }
+
+          &.org-button {
+            background: $primary-blue;
+
+            &:hover {
+              background: $primary-blue-light;
+            }
+          }
+        }
+      }
+
+      .users-list {
+        .loading,
+        .empty-state {
+          text-align: center;
+          padding: $spacing-3xl;
+          color: $text-light;
+        }
+
+        .users-table-card {
+          background: $white;
+          border-radius: $radius-md;
+          border: 2px solid $primary-dark;
+          border-left: 5px solid $primary-dark;
+          box-shadow: $shadow-md;
+          overflow: auto;
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+
+            thead {
+              background: rgba($primary-dark, 0.95);
+              color: $white;
+
+              th {
+                text-align: center;
+                padding: $spacing-md $spacing-lg;
+                font-weight: $font-weight-semibold;
+                white-space: nowrap;
+              }
+            }
+
+            tbody {
+              tr {
+                border-bottom: 1px solid $border-light;
+
+                &:hover {
+                  background: $bg-light;
+                }
+
+                td {
+                  text-align: center;
+                  padding: $spacing-md $spacing-sm;
+
+                  .no-permission {
+                    color: $text-light;
+                    font-size: $font-size-sm;
+                  }
+
+                  .table-action {
+                    border: none;
+                    border-radius: $radius-sm;
+                    padding: $spacing-sm $spacing-md;
+                    margin: 0 4px;
+                    font-size: $font-size-sm;
+                    font-weight: $font-weight-semibold;
+                    cursor: pointer;
+
+                    &.edit {
+                      background: $primary-blue;
+                      color: $white;
+                    }
+
+                    &.delete {
+                      background: $primary-led;
+                      color: $white;
+
+                      &:disabled {
+                        opacity: 0.45;
+                        cursor: not-allowed;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .role-badge {
+    display: inline-block;
+    border-radius: $radius-md;
+    padding: $spacing-sm $spacing-md;
+    text-transform: uppercase;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+
+    &.role-admin {
+      background: rgba(112, 48, 160, 0.12);
+      color: #7030a0;
+    }
+
+    &.role-user {
+      background: rgba($primary-blue, 0.12);
+      color: $primary-blue;
+    }
+
+    &.role-guest {
+      background: rgba($primary-teal, 0.12);
+      color: $primary-teal-dark;
+    }
+  }
+
+  .error-message {
+    background-color: #ffebee;
+    color: #d32f2f;
+    padding: $spacing-lg;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-lg;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    p {
+      margin: 0;
+    }
+
+    button {
+      padding: $spacing-sm $spacing-md;
+      background-color: #d32f2f;
+      color: $white;
+      border: none;
+      border-radius: $radius-md;
+      cursor: pointer;
+    }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+
+    &.org-form-overlay {
+      z-index: 1200;
+    }
+
+    .modal-content {
+      background: $white;
+      border-radius: $radius-md;
+      box-shadow: $shadow-xl;
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-lg $spacing-xl;
+        border-bottom: 1px solid $border-light;
+
+        h3 {
+          margin: 0;
+          color: $text-dark;
+        }
+
+        .modal-close {
+          border: none;
+          background: transparent;
+          font-size: 28px;
+          line-height: 1;
+          cursor: pointer;
+          color: $text-light;
+        }
+      }
+
+      &.org-form-modal {
+        max-width: 600px;
+        width: 90%;
+      }
+
+      &.org-modal {
+        max-width: 980px;
+        width: min(980px, 92vw);
+
+        .modal-body {
+          padding: $spacing-xl;
+        }
+      }
+
+      .user-form {
+        padding: $spacing-xl;
+        display: grid;
+        gap: $spacing-md;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba($text-light, 0.35) transparent;
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: rgba($text-light, 0.4);
+          border-radius: $radius-sm;
+
+          &:hover {
+            background: rgba($text-light, 0.45);
+          }
+        }
+
+        label {
+          display: grid;
+          gap: 6px;
+          text-align: left;
+          color: $text-dark;
+          font-weight: $font-weight-semibold;
+          margin-bottom: $spacing-lg;
+        }
+
+        input,
+        select {
+          border: 2px solid $border-light;
+          border-radius: $radius-md;
+          padding: $spacing-md;
+          font-size: $font-size-base;
+          font-family: $font-sans;
+          background: $white;
+          color: $text-dark;
+          transition: border-color 0.2s ease;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-teal;
+          }
+        }
+
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: $spacing-sm;
+          margin: $spacing-md (-$spacing-xl) (-$spacing-xl);
+          padding: $spacing-md $spacing-xl;
+          position: sticky;
+          bottom: 0;
+          z-index: 2;
+          background: rgba($white, 0.96);
+          border-top: 1px solid $border-light;
+          backdrop-filter: blur(2px);
+
+          button {
+            border: none;
+            border-radius: $radius-sm;
+            padding: $spacing-sm $spacing-lg;
+            font-weight: $font-weight-semibold;
+            cursor: pointer;
+          }
+
+          .cancel-button {
+            background: $border-light;
+            color: $text-dark;
+          }
+
+          .submit-button {
+            background: $primary-teal;
+            color: $white;
+          }
+        }
+      }
+
+      .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xl;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba($text-light, 0.35) transparent;
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: rgba($text-light, 0.4);
+          border-radius: $radius-sm;
+
+          &:hover {
+            background: rgba($text-light, 0.45);
+          }
+        }
+
+        .org-list {
+          min-width: 0;
+
+          .org-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: $spacing-lg;
+
+            h4 {
+              margin: 0;
+              color: $text-dark;
+            }
+
+            button {
+              border: none;
+              border-radius: $radius-md;
+              padding: $spacing-md $spacing-xl;
+              color: $white;
+              background: $primary-blue;
+              cursor: pointer;
+              font-weight: $font-weight-semibold;
+
+              &:hover {
+                background: $primary-blue-light;
+              }
+            }
+          }
+
+          .org-table-card {
+            background: $white;
+            border-radius: $radius-md;
+            border: 2px solid $primary-dark;
+            border-left: 5px solid $primary-dark;
+            box-shadow: $shadow-md;
+            overflow: auto;
+            max-height: calc(80vh - 220px);
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+
+              thead {
+                background: rgba($primary-dark, 0.95);
+                color: $white;
+
+                th {
+                  text-align: center;
+                  padding: $spacing-md $spacing-lg;
+                  font-weight: $font-weight-semibold;
+                  white-space: nowrap;
+                }
+              }
+
+              tbody {
+                tr {
+                  border-bottom: 1px solid $border-light;
+
+                  &:hover {
+                    background: $bg-light;
+                  }
+
+                  td {
+                    text-align: center;
+                    padding: $spacing-md $spacing-sm;
+
+                    &:last-child {
+                      white-space: nowrap;
+                    }
+
+                    .table-action {
+                      border: none;
+                      border-radius: $radius-sm;
+                      padding: $spacing-sm $spacing-md;
+                      margin: 0 4px;
+                      font-size: $font-size-sm;
+                      font-weight: $font-weight-semibold;
+                      cursor: pointer;
+
+                      &.edit {
+                        background: $primary-blue;
+                        color: $white;
+                      }
+
+                      &.delete {
+                        background: $primary-led;
+                        color: $white;
+
+                        &:disabled {
+                          opacity: 0.45;
+                          cursor: not-allowed;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Organization form modal overlay
+  .modal-overlay.org-form-overlay {
+    z-index: 1200;
+  }
+
+  // Organization form content styles
+  .org-form-content {
+    padding: $spacing-xl;
+    display: grid;
+    gap: $spacing-md;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba($text-light, 0.35) transparent;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba($text-light, 0.4);
+      border-radius: $radius-sm;
+
+      &:hover {
+        background: rgba($text-light, 0.45);
+      }
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      text-align: left;
+      color: $text-dark;
+      font-weight: $font-weight-semibold;
+      margin-bottom: $spacing-lg;
+    }
+
+    input {
+      border: 2px solid $border-light;
+      border-radius: $radius-md;
+      padding: $spacing-md;
+      font-size: $font-size-base;
+      font-family: $font-sans;
+      background: $white;
+      color: $text-dark;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-teal;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-sm;
+      margin: $spacing-md (-$spacing-xl) (-$spacing-xl);
+      padding: $spacing-md $spacing-xl;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      background: rgba($white, 0.96);
+      border-top: 1px solid $border-light;
+      backdrop-filter: blur(2px);
+
+      button {
+        border: none;
+        border-radius: $radius-md;
+        padding: $spacing-md $spacing-lg;
+        font-weight: $font-weight-semibold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .cancel-button {
+        background: $border-light;
+        color: $text-dark;
+
+        &:hover {
+          background: darken($border-light, 10%);
+        }
+      }
+
+      .submit-button {
+        background: $primary-teal;
+        color: $white;
+
+        &:hover {
+          background: $primary-teal-dark;
+        }
+      }
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    .modal-content.org-modal {
+      width: 95%;
+
+      .modal-body {
+        padding: $spacing-lg;
+      }
+    }
+
+    .modal-content .org-list .org-list-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: $spacing-sm;
+    }
+  }
+}

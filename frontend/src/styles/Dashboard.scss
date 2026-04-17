@@ -1,4 +1,4 @@
-@import 'variables';
+@import "variables";
 
 .dashboard-container {
   min-height: 100vh;
@@ -6,273 +6,270 @@
   font-family: $font-sans;
   display: flex;
   flex-direction: column;
-}
 
-.dashboard-body {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-  margin-top: 80px; // ヘッダーの高さ分を余白
-}
-
-.main-content {
-  flex: 1;
-  margin-left: 60px; // サイドバーの幅分を余白
-  height: calc(100vh - 80px);
-  background: $bg-light;
-  padding: $spacing-2xl;
-  overflow-y: auto;
-  flex: 1;
-  background: $bg-light;
-  padding: $spacing-2xl;
-  overflow-y: auto;
-
-  .content-wrapper {
-    width: 1400px;
-    max-width: 90%;
-    margin: 0 auto;
-
-    h2 {
-      color: $text-dark;
-      font-size: $font-size-xl;
-      font-weight: $font-weight-semibold;
-      margin-bottom: $spacing-xl;
-      text-align: left;
-      padding: 0.5rem 1rem;
-      border-left: 5px solid $primary-teal;
-      border-bottom: 2px solid $primary-teal;
-
-      span {
-        font-size: $font-size-base;
-        color: $text-light;
-      }
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: $spacing-xl;
-      margin: $spacing-3xl auto;
-
-      .stat-card {
-        background: $white;
-        border-radius: $radius-md;
-        border: 2px solid $primary-dark;
-        border-left: 5px solid $primary-dark;
-        box-shadow: $shadow-md;
-        padding: $spacing-xl;
-        text-align: left;
-
-        h3 {
-          color: $text-dark;
-          font-size: $font-size-lg;
-          font-weight: 600;
-          margin-bottom: $spacing-md;
-        }
-
-        .english-title {
-          color: $text-light;
-          font-size: $font-size-sm;
-          margin-top: -$spacing-sm;
-          margin-bottom: $spacing-md;
-        }
-
-        .stat-number {
-          color: $primary-teal;
-          font-size: $font-size-2xl;
-          font-weight: $font-weight-semibold;
-          margin: 0;
-        }
-
-        cursor: pointer;
-        transition: transform 0.15s ease,
-        box-shadow 0.15s ease,
-        border-color 0.15s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-        }
-
-        &.active {
-          border-left-color: $primary-teal;
-          transform: translateY(-4px);
-          box-shadow: 0 10px 20px rgba($primary-teal, 0.25);
-        }
-
-        &.items-card {
-          border-color: $primary-dark;
-          box-shadow: 0 5px 15px rgba($primary-dark, 0.3);
-
-          .stat-number {
-            color: $primary-dark;
-          }
-        }
-
-        &.in-use-card {
-          border-color: $primary-teal-dark;
-          box-shadow: 0 5px 15px rgba($primary-teal-dark, 0.3);
-
-          .stat-number {
-            color: $primary-teal-dark;
-          }
-        }
-
-        &.loans-card {
-          border-color: $primary-blue-light;
-          box-shadow: 0 5px 15px rgba($primary-blue-light, 0.3);
-
-          .stat-number {
-            color: $primary-blue-light;
-          }
-        }
-
-        &.delayed-card {
-          border-color: $primary-led;
-          box-shadow: 0 5px 15px rgba($primary-led, 0.3);
-
-          .stat-number {
-            color: $primary-led;
-          }
-        }
-      }
-    }
-
-    .recent-activities {
-      background: $white;
-      border-radius: $radius-md;
-      border: 2px solid $primary-dark;
-      border-top: 7px solid $primary-dark;
-      box-shadow: $shadow-md;
-      padding: $spacing-xl;
-
-      h3 {
-        color: $text-dark;
-        font-size: $font-size-xl;
-        font-weight: $font-weight-semibold;
-        margin-bottom: $spacing-lg;
-        border-bottom: 2px solid var(--bs-gray);
-        text-align: left;
-
-        span {
-          font-size: $font-size-lg;
-          color: $text-light;
-        }
-      }
-
-      &.items-list {
-        border-color: $primary-dark;
-
-        h3 {
-          color: $primary-dark;
-        }
-
-        .activity-table {
-
-          th,
-          td {
-            color: $text-dark;
-          }
-        }
-      }
-
-      &.in-use-list {
-        border-color: $primary-teal-dark;
-
-        h3 {
-          color: $primary-teal-dark;
-        }
-
-        .activity-table {
-
-          th,
-          td {
-            color: $text-dark;
-          }
-        }
-      }
-
-      &.loans-list {
-        border-color: $primary-blue-light;
-
-        h3 {
-          color: $primary-blue-light;
-        }
-
-        .activity-table {
-
-          th,
-          td {
-            color: $text-dark;
-          }
-        }
-      }
-
-      &.delayed-list {
-        border-color: $primary-led;
-
-        h3 {
-          color: $primary-led;
-        }
-
-        .activity-table {
-
-          th,
-          td {
-            color: $text-dark;
-          }
-        }
-      }
-
-      .activity-table-container {
-        overflow-x: auto;
-      }
-
-      .activity-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 0;
-
-        th,
-        td {
-          padding: $spacing-sm $spacing-md;
-          text-align: left;
-          border-bottom: 1px solid $border-light;
-        }
-
-        th {
-          font-weight: $font-weight-semibold;
-          background: rgba($text-light, 0.1);
-        }
-
-        tbody tr {
-          &:hover {
-            background: rgba($text-light, 0.05);
-          }
-
-          &:last-child td {
-            border-bottom: none;
-          }
-
-          .td-date {
-            width: 200px;
-            max-width: 230px;
-          }
-        }
-      }
-    }
-  }
-}
-
-// ===== Responsive Design =====
-@media (max-width: $breakpoint-md) {
   .dashboard-body {
-    flex-direction: column;
-    margin-top: 80px;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    margin-top: 80px; // ヘッダーの高さ分を余白
   }
 
   .main-content {
-    margin-left: 0;
-    height: auto;
-    padding: $spacing-lg;
+    flex: 1;
+    margin-left: 60px; // サイドバーの幅分を余白
+    height: calc(100vh - 80px);
+    background: $bg-light;
+    padding: $spacing-2xl;
+    overflow-y: auto;
+    flex: 1;
+    background: $bg-light;
+    padding: $spacing-2xl;
+    overflow-y: auto;
+
+    .content-wrapper {
+      width: 1400px;
+      max-width: 90%;
+      margin: 0 auto;
+
+      h2 {
+        color: $text-dark;
+        font-size: $font-size-xl;
+        font-weight: $font-weight-semibold;
+        margin-bottom: $spacing-xl;
+        text-align: left;
+        padding: 0.5rem 1rem;
+        border-left: 5px solid $primary-teal;
+        border-bottom: 2px solid $primary-teal;
+
+        span {
+          font-size: $font-size-base;
+          color: $text-light;
+        }
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: $spacing-xl;
+        margin: $spacing-3xl auto;
+
+        .stat-card {
+          background: $white;
+          border-radius: $radius-md;
+          border: 2px solid $primary-dark;
+          border-left: 5px solid $primary-dark;
+          box-shadow: $shadow-md;
+          padding: $spacing-xl;
+          text-align: left;
+
+          h3 {
+            color: $text-dark;
+            font-size: $font-size-lg;
+            font-weight: 600;
+            margin-bottom: $spacing-md;
+          }
+
+          .english-title {
+            color: $text-light;
+            font-size: $font-size-sm;
+            margin-top: -$spacing-sm;
+            margin-bottom: $spacing-md;
+          }
+
+          .stat-number {
+            color: $primary-teal;
+            font-size: $font-size-2xl;
+            font-weight: $font-weight-semibold;
+            margin: 0;
+          }
+
+          cursor: pointer;
+          transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+          }
+
+          &.active {
+            border-left-color: $primary-teal;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba($primary-teal, 0.25);
+          }
+
+          &.items-card {
+            border-color: $primary-dark;
+            box-shadow: 0 5px 15px rgba($primary-dark, 0.3);
+
+            .stat-number {
+              color: $primary-dark;
+            }
+          }
+
+          &.in-use-card {
+            border-color: $primary-teal-dark;
+            box-shadow: 0 5px 15px rgba($primary-teal-dark, 0.3);
+
+            .stat-number {
+              color: $primary-teal-dark;
+            }
+          }
+
+          &.loans-card {
+            border-color: $primary-blue-light;
+            box-shadow: 0 5px 15px rgba($primary-blue-light, 0.3);
+
+            .stat-number {
+              color: $primary-blue-light;
+            }
+          }
+
+          &.delayed-card {
+            border-color: $primary-led;
+            box-shadow: 0 5px 15px rgba($primary-led, 0.3);
+
+            .stat-number {
+              color: $primary-led;
+            }
+          }
+        }
+      }
+
+      .recent-activities {
+        background: $white;
+        border-radius: $radius-md;
+        border: 2px solid $primary-dark;
+        border-top: 7px solid $primary-dark;
+        box-shadow: $shadow-md;
+        padding: $spacing-xl;
+
+        h3 {
+          color: $text-dark;
+          font-size: $font-size-xl;
+          font-weight: $font-weight-semibold;
+          margin-bottom: $spacing-lg;
+          border-bottom: 2px solid var(--bs-gray);
+          text-align: left;
+
+          span {
+            font-size: $font-size-lg;
+            color: $text-light;
+          }
+        }
+
+        &.items-list {
+          border-color: $primary-dark;
+
+          h3 {
+            color: $primary-dark;
+          }
+
+          .activity-table {
+            th,
+            td {
+              color: $text-dark;
+            }
+          }
+        }
+
+        &.in-use-list {
+          border-color: $primary-teal-dark;
+
+          h3 {
+            color: $primary-teal-dark;
+          }
+
+          .activity-table {
+            th,
+            td {
+              color: $text-dark;
+            }
+          }
+        }
+
+        &.loans-list {
+          border-color: $primary-blue-light;
+
+          h3 {
+            color: $primary-blue-light;
+          }
+
+          .activity-table {
+            th,
+            td {
+              color: $text-dark;
+            }
+          }
+        }
+
+        &.delayed-list {
+          border-color: $primary-led;
+
+          h3 {
+            color: $primary-led;
+          }
+
+          .activity-table {
+            th,
+            td {
+              color: $text-dark;
+            }
+          }
+        }
+
+        .activity-table-container {
+          overflow-x: auto;
+        }
+
+        .activity-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 0;
+
+          th,
+          td {
+            padding: $spacing-sm $spacing-md;
+            text-align: left;
+            border-bottom: 1px solid $border-light;
+          }
+
+          th {
+            font-weight: $font-weight-semibold;
+            background: rgba($text-light, 0.1);
+          }
+
+          tbody tr {
+            &:hover {
+              background: rgba($text-light, 0.05);
+            }
+
+            &:last-child td {
+              border-bottom: none;
+            }
+
+            .td-date {
+              width: 200px;
+              max-width: 230px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ===== Responsive Design =====
+  @media (max-width: $breakpoint-md) {
+    .dashboard-body {
+      flex-direction: column;
+      margin-top: 80px;
+    }
+
+    .main-content {
+      margin-left: 0;
+      height: auto;
+      padding: $spacing-lg;
+    }
   }
 }

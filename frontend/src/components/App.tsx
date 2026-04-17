@@ -4,6 +4,7 @@ import Login from './Login'
 import Dashboard from './Dashboard'
 import Assets from './Assets'
 import Loans from './Loans'
+import Users from './Users'
 import '../styles/App.scss'
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
       <Route path="/assets" element={<Assets user={user} onLogout={handleLogout} />} />
       <Route path="/loans" element={<Loans user={user} onLogout={handleLogout} />} />
+      <Route path="/users" element={<Users user={user} onLogout={handleLogout} />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
