@@ -4,7 +4,6 @@ import dashboardIcon from '../assets/icons/dashboard.png';
 import assetIcon from '../assets/icons/asset.png';
 import listIcon from '../assets/icons/list.png';
 import userIcon from '../assets/icons/user.png';
-import settingIcon from '../assets/icons/setting.png';
 
 interface NavItem {
   icon: string;
@@ -21,7 +20,6 @@ const defaultNavItems: NavItem[] = [
   { icon: assetIcon, label: 'Assets' },
   { icon: listIcon, label: 'Loans' },
   { icon: userIcon, label: 'Users' },
-  { icon: settingIcon, label: 'Settings' },
 ];
 
 function Sidebar({ currentPage = 'Dashboard' }: SidebarProps) {

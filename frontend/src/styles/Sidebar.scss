@@ -7,7 +7,7 @@
   bottom: 0;
   width: 70px;
   background: $white;
-  box-shadow: $shadow-md;
+  box-shadow: 0 4px 12px rgba(128, 128, 128, 0.2);
   z-index: 900;
   height: calc(100vh - 80px);
   &::-webkit-scrollbar:horizontal {
@@ -67,7 +67,7 @@
           background: $white;
           padding: $spacing-sm $spacing-lg;
           border-radius: $radius-sm;
-          box-shadow: $shadow-md;
+          box-shadow: 0 4px 12px rgba(128, 128, 128, 0.2);
           border: 1px solid $primary-dark;
           opacity: 0;
           visibility: hidden;

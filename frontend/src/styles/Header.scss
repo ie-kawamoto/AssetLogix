@@ -12,7 +12,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: $shadow-md;
+  box-shadow: 0 4px 12px rgba(128, 128, 128, 0.2);
   z-index: 1000;
 
   .header-left {
@@ -20,10 +20,34 @@
     align-items: center;
     gap: $spacing-lg;
 
+    .header-logo-link {
+      display: inline-flex;
+      text-decoration: none;
+      border-radius: $radius-sm;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba($primary-dark, 0.18);
+        opacity: 0.9;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $primary-teal;
+        outline-offset: 2px;
+      }
+    }
+
     .header-logo {
       min-width: 150px;
       width: 200px;
       height: auto;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+
+    .header-logo-link:hover .header-logo {
+      filter: brightness(0.96);
     }
 
     h1 {

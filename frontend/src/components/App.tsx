@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Login from './Login'
 import Dashboard from './Dashboard'
 import Assets from './Assets'
@@ -8,6 +8,7 @@ import Users from './Users'
 import '../styles/App.scss'
 
 function App() {
+  const navigate = useNavigate()
   const [token, setToken] = useState<string | null>(null)
   const [user, setUser] = useState<any>(null)
 
@@ -49,6 +50,7 @@ function App() {
     setUser(null)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    navigate('/')
   }
 
   if (!token || !user) {
