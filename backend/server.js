@@ -80,6 +80,22 @@ const toSafeUser = (user) => ({
   updatedAt: user.updatedAt,
 });
 
+const logActivity = async ({ userId, organizationId, action, targetType, targetId = null }) => {
+  try {
+    await prisma.activityLog.create({
+      data: {
+        userId,
+        organizationId,
+        action,
+        targetType,
+        targetId,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to write activity log:', error);
+  }
+};
+
 // ログインエンドポイント
 app.post('/api/login', async (req, res) => {
   console.log('Login request received:', req.body);
@@ -577,6 +593,15 @@ app.post('/api/items', authenticateToken, async (req, res) => {
         instances: true
       },
     });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '品目登録',
+      targetType: 'ITEM',
+      targetId: item.id,
+    });
+
     res.json(item);
   } catch (error) {
     console.error(error);
@@ -601,6 +626,15 @@ app.put('/api/items/:id', authenticateToken, async (req, res) => {
         instances: true
       },
     });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '品目更新',
+      targetType: 'ITEM',
+      targetId: item.id,
+    });
+
     res.json(item);
   } catch (error) {
     console.error(error);
@@ -612,9 +646,20 @@ app.delete('/api/items/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
+    const itemId = parseInt(id, 10);
+
     await prisma.item.delete({
-      where: { id: parseInt(id), organizationId: req.user.organizationId },
+      where: { id: itemId, organizationId: req.user.organizationId },
     });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '品目削除',
+      targetType: 'ITEM',
+      targetId: itemId,
+    });
+
     res.json({ message: 'Item deleted' });
   } catch (error) {
     console.error(error);
@@ -637,6 +682,117 @@ app.get('/api/instances', authenticateToken, async (req, res) => {
       },
     });
     res.json(instances);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
+app.get('/api/activity-logs', authenticateToken, async (req, res) => {
+  const parsedLimit = parseInt(req.query.limit, 10);
+  const limit = Number.isNaN(parsedLimit) ? 50 : Math.min(Math.max(parsedLimit, 1), 200);
+
+  try {
+    const logs = await prisma.activityLog.findMany({
+      where: {
+        organizationId: req.user.organizationId,
+        targetType: { in: ['ITEM', 'INSTANCE', 'LOAN'] },
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+
+    const itemIds = logs
+      .filter((log) => log.targetType === 'ITEM' && typeof log.targetId === 'number')
+      .map((log) => log.targetId);
+    const instanceIds = logs
+      .filter((log) => log.targetType === 'INSTANCE' && typeof log.targetId === 'number')
+      .map((log) => log.targetId);
+    const loanIds = logs
+      .filter((log) => log.targetType === 'LOAN' && typeof log.targetId === 'number')
+      .map((log) => log.targetId);
+
+    const [items, instances, loans] = await Promise.all([
+      itemIds.length > 0
+        ? prisma.item.findMany({
+            where: { id: { in: [...new Set(itemIds)] }, organizationId: req.user.organizationId },
+            select: { id: true, name: true },
+          })
+        : Promise.resolve([]),
+      instanceIds.length > 0
+        ? prisma.instance.findMany({
+            where: { id: { in: [...new Set(instanceIds)] }, organizationId: req.user.organizationId },
+            include: {
+              item: {
+                select: { name: true },
+              },
+            },
+          })
+        : Promise.resolve([]),
+      loanIds.length > 0
+        ? prisma.loan.findMany({
+            where: { id: { in: [...new Set(loanIds)] }, organizationId: req.user.organizationId },
+            include: {
+              instance: {
+                include: {
+                  item: {
+                    select: { name: true },
+                  },
+                },
+              },
+            },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const itemMap = new Map(items.map((item) => [item.id, item.name]));
+    const instanceMap = new Map(instances.map((instance) => [instance.id, {
+      itemName: instance.item?.name,
+      instanceName: instance.instanceName,
+      serialNumber: instance.serialNumber,
+    }]));
+    const loanMap = new Map(loans.map((loan) => [loan.id, {
+      itemName: loan.instance?.item?.name,
+      instanceName: loan.instance?.instanceName,
+      serialNumber: loan.instance?.serialNumber,
+    }]));
+
+    const formatLabel = (entry) => {
+      if (!entry) return '対象なし（削除済み）';
+      if (entry.instanceName) return `${entry.itemName || '不明'} / ${entry.instanceName}`;
+      if (entry.serialNumber) return `${entry.itemName || '不明'} / ${entry.serialNumber}`;
+      return entry.itemName || '不明';
+    };
+
+    const result = logs.map((log) => {
+      let itemLabel = '対象なし（削除済み）';
+
+      if (log.targetType === 'ITEM') {
+        itemLabel = itemMap.get(log.targetId) || '品目（削除済み）';
+      } else if (log.targetType === 'INSTANCE') {
+        itemLabel = formatLabel(instanceMap.get(log.targetId));
+      } else if (log.targetType === 'LOAN') {
+        itemLabel = formatLabel(loanMap.get(log.targetId));
+      }
+
+      return {
+        id: log.id,
+        date: log.createdAt,
+        action: log.action,
+        targetType: log.targetType,
+        item: itemLabel,
+        user: log.user?.name || '不明',
+      };
+    });
+
+    res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'サーバーエラー' });
@@ -703,6 +859,15 @@ app.post('/api/instances', authenticateToken, async (req, res) => {
         location: true,
       },
     });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '個体登録',
+      targetType: 'INSTANCE',
+      targetId: instance.id,
+    });
+
     res.json(instance);
   } catch (error) {
     console.error(error);
@@ -734,6 +899,15 @@ app.put('/api/instances/:id', authenticateToken, async (req, res) => {
         location: true,
       },
     });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '個体更新',
+      targetType: 'INSTANCE',
+      targetId: instance.id,
+    });
+
     res.json(instance);
   } catch (error) {
     console.error(error);
@@ -745,9 +919,20 @@ app.delete('/api/instances/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
+    const instanceId = parseInt(id, 10);
+
     await prisma.instance.delete({
-      where: { id: parseInt(id), organizationId: req.user.organizationId },
+      where: { id: instanceId, organizationId: req.user.organizationId },
     });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '個体削除',
+      targetType: 'INSTANCE',
+      targetId: instanceId,
+    });
+
     res.json({ message: 'Instance deleted' });
   } catch (error) {
     console.error(error);
@@ -1119,6 +1304,14 @@ app.post('/api/loans', authenticateToken, async (req, res) => {
       data: { status: 'RENTED' }
     });
 
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '貸し出し',
+      targetType: 'LOAN',
+      targetId: loan.id,
+    });
+
     res.json(loan);
   } catch (error) {
     console.error(error);
@@ -1178,6 +1371,21 @@ app.put('/api/loans/:id', authenticateToken, async (req, res) => {
       }
     });
 
+    let action = '貸出更新';
+    if (nextStatus === 'RETURNED' && loan.status !== 'RETURNED') {
+      action = '返却';
+    } else if (dueDate !== undefined) {
+      action = '返却期限変更';
+    }
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action,
+      targetType: 'LOAN',
+      targetId: updated.id,
+    });
+
     res.json(updated);
   } catch (error) {
     console.error(error);
@@ -1229,6 +1437,14 @@ app.post('/api/loans/:id/return', authenticateToken, async (req, res) => {
     await prisma.instance.update({
       where: { id: loan.instanceId },
       data: { status: 'AVAILABLE' }
+    });
+
+    await logActivity({
+      userId: req.user.userId,
+      organizationId: req.user.organizationId,
+      action: '返却',
+      targetType: 'LOAN',
+      targetId: updatedLoan.id,
     });
 
     res.json(updatedLoan);
